@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>个人主页</title>
+<style>
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --primary: #6C5CE7;
+    --secondary: #00CEC9;
+    --accent: #FD79A8;
+    --bg: #0C0B1D;
+    --card: #15132B;
+    --text: #E8E6F0;
+    --text-muted: #9B96B8;
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.7;
+    overflow-x: hidden;
+  }
+
+  /* ---- 动态星空背景 ---- */
+  .stars {
+    position: fixed; inset: 0; pointer-events: none; z-index: 0;
+    background: radial-gradient(ellipse at 20% 50%, rgba(108,92,231,0.12) 0%, transparent 60%),
+                radial-gradient(ellipse at 80% 20%, rgba(0,206,201,0.10) 0%, transparent 60%),
+                radial-gradient(ellipse at 50% 80%, rgba(253,121,168,0.08) 0%, transparent 60%);
+  }
+
+  /* ---- 导航 ---- */
+  .nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    display: flex; justify-content: center; gap: 2rem;
+    padding: 1rem 2rem;
+    background: rgba(12, 11, 29, 0.75);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+  }
+  .nav a {
+    color: var(--text-muted); text-decoration: none; font-size: 0.92rem;
+    transition: color 0.3s; position: relative;
+  }
+  .nav a::after {
+    content: ''; position: absolute; bottom: -4px; left: 50%; transform: translateX(-50%) scaleX(0);
+    width: 100%; height: 2px; border-radius: 2px;
+    background: linear-gradient(90deg, var(--primary), var(--secondary));
+    transition: transform 0.3s;
+  }
+  .nav a:hover { color: #fff; }
+  .nav a:hover::after { transform: translateX(-50%) scaleX(1); }
+
+  /* ---- Hero ---- */
+  .hero {
+    position: relative; z-index: 1;
+    min-height: 100vh; display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    text-align: center; padding: 2rem;
+  }
+  .hero-avatar {
+    width: 130px; height: 130px; border-radius: 50%;
+    background: linear-gradient(135deg, var(--primary), var(--accent));
+    padding: 3px; margin-bottom: 2rem;
+    animation: float 6s ease-in-out infinite;
+  }
+  .hero-avatar img {
+    width: 100%; height: 100%; border-radius: 50%;
+    object-fit: cover; background: var(--card);
+  }
+  .hero-avatar .avatar-placeholder {
+    width: 100%; height: 100%; border-radius: 50%;
+    background: var(--card);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 3rem;
+  }
+  @keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-12px); }
+  }
+  .hero-name {
+    font-size: clamp(2.2rem, 6vw, 3.6rem); font-weight: 800;
+    background: linear-gradient(135deg, var(--secondary), var(--primary), var(--accent));
+    background-size: 200% auto;
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    animation: gradientShift 4s ease infinite;
+  }
+  @keyframes gradientShift {
+    0%, 100% { background-position: 0% center; }
+    50% { background-position: 200% center; }
+  }
+  .hero-role {
+    font-size: 1.25rem; color: var(--text-muted); margin-top: 0.5rem;
+    font-weight: 400;
+  }
+  .hero-role .cursor {
+    display: inline-block; width: 2px; height: 1.2em;
+    background: var(--secondary); margin-left: 3px;
+    vertical-align: text-bottom; animation: blink 0.8s step-end infinite;
+  }
+  @keyframes blink { 50% { opacity: 0; } }
+  .hero-tagline {
+    max-width: 520px; margin-top: 1.5rem; color: var(--text-muted);
+    font-size: 1rem; line-height: 1.8;
+  }
+  .hero-scroll {
+    position: absolute; bottom: 2rem;
+    display: flex; flex-direction: column; align-items: center; gap: 0.5rem;
+    color: var(--text-muted); font-size: 0.78rem;
+    animation: bounce 2s ease infinite;
+  }
+  .hero-scroll span { font-size: 1.2rem; }
+  @keyframes bounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(8px); }
+  }
+
+  /* ---- Section ---- */
+  .section {
+    position: relative; z-index: 1;
+    max-width: 900px; margin: 0 auto; padding: 5rem 2rem;
+  }
+  .section-title {
+    font-size: 1.8rem; font-weight: 700; margin-bottom: 2.5rem;
+    display: flex; align-items: center; gap: 0.75rem;
+  }
+  .section-title::before {
+    content: ''; width: 32px; height: 3px; border-radius: 2px;
+    background: linear-gradient(90deg, var(--primary), var(--secondary));
+  }
+
+  /* ---- About ---- */
+  .about-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem;
+  }
+  .about-text {
+    grid-column: 1 / -1;
+    background: var(--card); border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 14px; padding: 2rem;
+    color: var(--text-muted); font-size: 0.98rem; line-height: 1.9;
+  }
+  .stat-card {
+    background: var(--card); border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 14px; padding: 1.5rem;
+    text-align: center; transition: transform 0.3s, border-color 0.3s;
+  }
+  .stat-card:hover {
+    transform: translateY(-4px);
+    border-color: var(--primary);
+  }
+  .stat-number {
+    font-size: 2rem; font-weight: 800;
+    background: linear-gradient(135deg, var(--secondary), var(--primary));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  }
+  .stat-label { font-size: 0.85rem; color: var(--text-muted); margin-top: 0.25rem; }
+
+  /* ---- Contact ---- */
+  .contact-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+  }
+  .contact-card {
+    background: var(--card); border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 14px; padding: 1.75rem 1.5rem;
+    display: flex; align-items: center; gap: 1rem;
+    text-decoration: none; color: var(--text);
+    transition: transform 0.3s, border-color 0.3s, box-shadow 0.3s;
+  }
+  .contact-card:hover {
+    transform: translateY(-4px);
+    border-color: var(--primary);
+    box-shadow: 0 8px 30px rgba(108,92,231,0.15);
+  }
+  .contact-icon {
+    width: 48px; height: 48px; border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.4rem; flex-shrink: 0;
+  }
+  .contact-icon.github  { background: rgba(255,255,255,0.08); }
+  .contact-icon.email   { background: rgba(253,121,168,0.15); color: var(--accent); }
+  .contact-icon.wechat  { background: rgba(0,206,201,0.12); color: var(--secondary); }
+  .contact-icon.twitter { background: rgba(108,92,231,0.15); color: var(--primary); }
+  .contact-info .label { font-size: 0.78rem; color: var(--text-muted); }
+  .contact-info .value { font-size: 0.95rem; margin-top: 0.15rem; }
+
+  /* ---- Footer ---- */
+  .footer {
+    text-align: center; padding: 2rem; color: var(--text-muted);
+    font-size: 0.82rem; border-top: 1px solid rgba(255,255,255,0.04);
+  }
+
+  /* ---- 入场动画 ---- */
+  .fade-in {
+    opacity: 0; transform: translateY(30px);
+    transition: opacity 0.7s ease, transform 0.7s ease;
+  }
+  .fade-in.visible { opacity: 1; transform: translateY(0); }
+
+  /* ---- 响应式 ---- */
+  @media (max-width: 640px) {
+    .nav { gap: 1.25rem; padding: 0.75rem 1rem; }
+    .about-grid { grid-template-columns: 1fr; }
+    .section { padding: 3rem 1.25rem; }
+    .contact-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<div class="stars"></div>
+
+<nav class="nav">
+  <a href="#home">首页</a>
+  <a href="#about">关于我</a>
+  <a href="#contact">联系方式</a>
+</nav>
+
+<!-- ===== Hero ===== -->
+<section class="hero" id="home">
+  <div class="hero-avatar">
+    <div class="avatar-placeholder">🧑‍💻</div>
+  </div>
+  <h1 class="hero-name">李四</h1>
+  <p class="hero-role"><span id="typewriter"></span><span class="cursor"></span></p>
+  <p class="hero-tagline">
+    5 年前端开发经验，热爱技术、追求极致用户体验。<br>
+    专注于 React 生态与 Web 性能优化，偶尔也写写 Node.js。
+  </p>
+  <div class="hero-scroll">
+    <span>↓</span> 向下滚动
+  </div>
+</section>
+
+<!-- ===== 关于我 ===== -->
+<section class="section" id="about">
+  <h2 class="section-title">关于我</h2>
+
+  <div class="about-grid">
+    <p class="about-text fade-in">
+      你好！我是一名热爱前端开发的专业程序员，目前在上海工作。<br><br>
+      我始终相信，好的代码应当像好的文章一样，清晰、简洁、富有表现力。
+      工作中我注重工程化思维——从组件设计到构建工具链，再到 CI/CD 流水线，
+      我享受把一个想法从零到一打磨成产品上线的全过程。<br><br>
+      业余时间我喜欢写技术博客、参与开源项目，也常在 GitHub 上分享自己的小工具。
+      保持好奇心、持续学习，是我对待技术的态度。
+    </p>
+
+    <div class="stat-card fade-in">
+      <div class="stat-number">5+</div>
+      <div class="stat-label">年工作经验</div>
+    </div>
+    <div class="stat-card fade-in">
+      <div class="stat-number">20+</div>
+      <div class="stat-label">完成项目</div>
+    </div>
+    <div class="stat-card fade-in">
+      <div class="stat-number">10K+</div>
+      <div class="stat-label">GitHub Stars</div>
+    </div>
+    <div class="stat-card fade-in">
+      <div class="stat-number">50+</div>
+      <div class="stat-label">技术文章</div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== 联系方式 ===== -->
+<section class="section" id="contact">
+  <h2 class="section-title">联系方式</h2>
+
+  <div class="contact-grid">
+    <a class="contact-card fade-in" href="https://github.com" target="_blank" rel="noopener">
+      <div class="contact-icon github">🐙</div>
+      <div class="contact-info">
+        <div class="label">GitHub</div>
+        <div class="value">github.com/yourname</div>
+      </div>
+    </a>
+
+    <a class="contact-card fade-in" href="mailto:hello@example.com">
+      <div class="contact-icon email">✉️</div>
+      <div class="contact-info">
+        <div class="label">邮箱</div>
+        <div class="value">hello@example.com</div>
+      </div>
+    </a>
+
+    <div class="contact-card fade-in">
+      <div class="contact-icon wechat">💬</div>
+      <div class="contact-info">
+        <div class="label">微信</div>
+        <div class="value">your_wechat_id</div>
+      </div>
+    </div>
+
+    <a class="contact-card fade-in" href="https://twitter.com" target="_blank" rel="noopener">
+      <div class="contact-icon twitter">🐦</div>
+      <div class="contact-info">
+        <div class="label">Twitter / X</div>
+        <div class="value">@your_twitter</div>
+      </div>
+    </a>
+  </div>
+</section>
+
+<footer class="footer">
+  © 2026 Designed & Built with ❤️
+</footer>
+
+<script>
+  // ---- 打字机效果 ----
+  const roles = ['前端开发工程师', 'React 爱好者', '开源贡献者', '终身学习者'];
+  let roleIdx = 0, charIdx = 0, isDeleting = false;
+  const el = document.getElementById('typewriter');
+
+  function type() {
+    const current = roles[roleIdx];
+    if (isDeleting) {
+      el.textContent = current.substring(0, charIdx--);
+    } else {
+      el.textContent = current.substring(0, charIdx++);
+    }
+    let delay = isDeleting ? 40 : 120;
+    if (!isDeleting && charIdx === current.length) {
+      delay = 1500; isDeleting = true;
+    } else if (isDeleting && charIdx === 0) {
+      isDeleting = false; roleIdx = (roleIdx + 1) % roles.length;
+      delay = 300;
+    }
+    setTimeout(type, delay);
+  }
+  type();
+
+  // ---- 滚动入场动画 ----
+  const fadeEls = document.querySelectorAll('.fade-in');
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.15, rootMargin: '0px 0px -40px 0px' });
+
+  fadeEls.forEach((el, i) => {
+    el.style.transitionDelay = `${i * 0.1}s`;
+    observer.observe(el);
+  });
+</script>
+
+</body>
+</html>
