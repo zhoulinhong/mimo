@@ -14,11 +14,12 @@ git diff --staged           # 查看已暂存的内容改了什么
 
 ## 保存更改（提交三部曲）
 
-```bash
+```bgit restore -s 提交hash -- 文件名    # 恢复被删的文件ash
 git add 文件名               # 暂存某个文件
 git add .                   # 暂存所有改过的文件
 git commit -m "提交信息"      # 提交到本地仓库
 git push                    # 推送到 GitHub
+git restore -s 提交hash -- 文件名    # 恢复被删的文件
 ```
 
 最常用的就是这三步：`add` → `commit` → `push`
